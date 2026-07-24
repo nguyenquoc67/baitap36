@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nguyễn Quốc Phong — Portfolio Bài Tập Web</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0b0f14;
+    --panel: #10161d;
+    --panel-2: #141b23;
+    --line: #212b35;
+    --text: #e6edf3;
+    --muted: #7c8a99;
+    --accent: #5eead4;
+    --accent-dim: rgba(94,234,212,0.12);
+    --amber: #f5a623;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(94,234,212,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.6;
+    min-height:100vh;
+    padding:48px 24px 80px;
+  }
+  .wrap{max-width:960px; margin:0 auto;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+  .display{font-family:'Space Grotesk', sans-serif;}
+
+  /* ---- Terminal header ---- */
+  .term{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    overflow:hidden;
+    box-shadow:0 20px 60px -20px rgba(0,0,0,0.6);
+  }
+  .term-bar{
+    display:flex; align-items:center; gap:8px;
+    padding:10px 14px;
+    background:var(--panel-2);
+    border-bottom:1px solid var(--line);
+  }
+  .dot{width:10px; height:10px; border-radius:50%;}
+  .dot.r{background:#ff5f56;} .dot.y{background:#ffbd2e;} .dot.g{background:#27c93f;}
+  .term-title{margin-left:8px; font-size:12px; color:var(--muted);}
+  .term-body{padding:28px 32px 32px;}
+  .prompt-line{font-size:14px; color:var(--muted); margin-bottom:4px;}
+  .prompt-line .sym{color:var(--accent);}
+  .cursor{
+    display:inline-block; width:8px; height:16px; background:var(--accent);
+    vertical-align:-3px; margin-left:6px;
+    animation:blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink{0%,49%{opacity:1;}50%,100%{opacity:0;}}
+
+  .name{
+    font-size:clamp(32px,5vw,48px);
+    font-weight:700;
+    letter-spacing:-0.5px;
+    margin:14px 0 6px;
+  }
+  .role{color:var(--accent); font-size:16px; margin-bottom:22px;}
+
+  .info-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:4px;
+    overflow:hidden;
+    margin-top:8px;
+  }
+  .info-cell{background:var(--panel); padding:14px 16px;}
+  .info-key{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:5px;}
+  .info-val{font-size:14px; color:var(--text); font-weight:500;}
+  .info-val a{color:var(--accent); text-decoration:none; border-bottom:1px dotted rgba(94,234,212,0.4);}
+  .info-val a:hover{border-bottom-style:solid;}
+
+  /* ---- Section label ---- */
+  .section-label{
+    display:flex; align-items:center; gap:12px;
+    margin:56px 0 22px;
+    color:var(--muted);
+    font-size:12px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+  }
+  .section-label::after{content:''; flex:1; height:1px; background:var(--line);}
+
+  /* ---- Module grid ---- */
+  .modules{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
+    gap:14px;
+  }
+  .card{
+    position:relative;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:22px 22px 20px;
+    text-decoration:none;
+    color:var(--text);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    transition:border-color .18s ease, transform .18s ease, background .18s ease;
+  }
+  .card:hover{
+    border-color:var(--accent);
+    background:var(--panel-2);
+    transform:translateY(-2px);
+  }
+  .card:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:3px;
+  }
+  .card-top{display:flex; justify-content:space-between; align-items:flex-start;}
+  .code{
+    font-size:12px;
+    color:var(--accent);
+    background:var(--accent-dim);
+    padding:3px 8px;
+    border-radius:3px;
+    letter-spacing:0.04em;
+  }
+  .arrow{color:var(--muted); transition:transform .18s ease, color .18s ease;}
+  .card:hover .arrow{transform:translateX(3px); color:var(--accent);}
+  .card-title{font-family:'Space Grotesk', sans-serif; font-size:18px; font-weight:600;}
+  .card-desc{font-size:13.5px; color:var(--muted); line-height:1.55;}
+  .card-file{font-size:11px; color:#4b5764; margin-top:auto; padding-top:8px;}
+
+  footer{
+    margin-top:64px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+    font-size:12px; color:var(--muted);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .cursor{animation:none; opacity:1;}
+    .card{transition:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="term">
+    <div class="term-bar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="term-title mono">bt36.html — ~/701-231A011174</span>
+    </div>
+    <div class="term-body">
+      <div class="prompt-line mono"><span class="sym">$</span> whoami<span class="cursor"></span></div>
+
+      <div class="name display">Nguyễn Quốc Phong</div>
+      <div class="role mono">Sinh viên CNTT · Định hướng Full Stack Developer</div>
+
+      <div class="info-grid">
+        <div class="info-cell">
+          <div class="info-key mono">MSSV</div>
+          <div class="info-val mono">231A011174</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-key mono">Lớp</div>
+          <div class="info-val mono">701</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-key mono">Trường</div>
+          <div class="info-val">Đại Học Văn Hiến</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-key mono">Môn học</div>
+          <div class="info-val">LẬP TRÌNH WEB - HK3</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-key mono">GVHD</div>
+          <div class="info-val">Thầy Nguyễn Quang Tấn</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-key mono">GitHub</div>
+          <div class="info-val"><a href="https://github.com/nguyenquoc67" target="_blank" rel="noopener">@nguyenquoc67</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label mono">// 6 bài tập — DOM & JavaScript</div>
+
+  <div class="modules">
+
+    <a class="card" href="k13.html">
+      <div class="card-top">
+        <span class="code mono">K13</span>
+        <span class="arrow mono">→</span>
+      </div>
+      <div class="card-title">Bộ đếm tương tác (Like)</div>
+      <div class="card-desc">Nút Like cập nhật số đếm theo thời gian thực, thao tác trực tiếp trên DOM.</div>
+      <div class="card-file mono">/k13.html</div>
+    </a>
+
+    <a class="card" href="k14.html">
+      <div class="card-top">
+        <span class="code mono">K14</span>
+        <span class="arrow mono">→</span>
+      </div>
+      <div class="card-title">Hiệu ứng cuộn mượt</div>
+      <div class="card-desc">Smooth scroll giữa các section bằng scrollIntoView và neo điều hướng.</div>
+      <div class="card-file mono">/k14.html</div>
+    </a>
+
+    <a class="card" href="k15.html">
+      <div class="card-top">
+        <span class="code mono">K15</span>
+        <span class="arrow mono">→</span>
+      </div>
+      <div class="card-title">Grid Layout động</div>
+      <div class="card-desc">Sinh lưới CSS Grid từ dữ liệu JS, số cột và số ô thay đổi linh hoạt.</div>
+      <div class="card-file mono">/k15.html</div>
+    </a>
+
+    <a class="card" href="tk7.html">
+      <div class="card-top">
+        <span class="code mono">TK7</span>
+        <span class="arrow mono">→</span>
+      </div>
+      <div class="card-title">Tạo chuỗi ngẫu nhiên</div>
+      <div class="card-desc">Sinh chuỗi ký tự ngẫu nhiên theo độ dài tùy chọn, dùng Math.random().</div>
+      <div class="card-file mono">/tk7.html</div>
+    </a>
+
+    <a class="card" href="tk8.html">
+      <div class="card-top">
+        <span class="code mono">TK8</span>
+        <span class="arrow mono">→</span>
+      </div>
+      <div class="card-title">Chuyển đổi Hex sang RGB</div>
+      <div class="card-desc">Nhập mã màu Hex, tự động tính và hiển thị giá trị RGB tương ứng.</div>
+      <div class="card-file mono">/tk8.html</div>
+    </a>
+
+    <a class="card" href="tk9.html">
+      <div class="card-top">
+        <span class="code mono">TK9</span>
+        <span class="arrow mono">→</span>
+      </div>
+      <div class="card-title">Hiển thị thời gian thực</div>
+      <div class="card-desc">Đồng hồ chạy real-time bằng setInterval, cập nhật mỗi giây.</div>
+      <div class="card-file mono">/tk9.html</div>
+    </a>
+
+  </div>
+
+  <footer class="mono">
+    <span>© 2026 Nguyễn Quốc Phong</span>
+    <span>bt36.html · LẬP TRÌNH WEB - HK3</span>
+  </footer>
+
+</div>
+</body>
+</html>
