@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TK5 — Accordion đơn giản</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#10161d; --panel-2:#141b23; --line:#212b35;
+    --text:#e6edf3; --muted:#7c8a99; --accent:#5eead4; --accent-dim:rgba(94,234,212,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:radial-gradient(ellipse 900px 500px at 15% -10%, rgba(94,234,212,0.06), transparent 60%), var(--bg);
+    color:var(--text); font-family:'IBM Plex Sans', sans-serif; min-height:100vh;
+    padding:48px 24px 80px; line-height:1.6;
+  }
+  .wrap{max-width:640px; margin:0 auto;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+  .display{font-family:'Space Grotesk', sans-serif;}
+  .back{display:inline-flex; align-items:center; gap:6px; color:var(--muted); text-decoration:none; font-size:13px; margin-bottom:28px;}
+  .back:hover{color:var(--accent);}
+  .code{font-size:12px; color:var(--accent); background:var(--accent-dim); padding:3px 8px; border-radius:3px;}
+  h1{font-size:clamp(26px,4vw,34px); font-weight:700; margin:14px 0 6px;}
+  .sub{color:var(--muted); font-size:14px; margin-bottom:32px;}
+
+  .accordion{border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--panel);}
+  .acc-item{border-bottom:1px solid var(--line);}
+  .acc-item:last-child{border-bottom:none;}
+
+  .acc-header{
+    width:100%; display:flex; align-items:center; justify-content:space-between;
+    padding:18px 20px; background:none; border:none; cursor:pointer;
+    color:var(--text); font-family:'Space Grotesk', sans-serif; font-size:16px; font-weight:600;
+    text-align:left; transition:background .15s ease;
+  }
+  .acc-header:hover{background:var(--panel-2);}
+  .acc-header:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
+  .acc-item.open .acc-header{color:var(--accent);}
+
+  .acc-icon{
+    flex:none; width:20px; height:20px; position:relative;
+    transition:transform .25s cubic-bezier(.4,0,.2,1);
+  }
+  .acc-icon::before, .acc-icon::after{
+    content:''; position:absolute; top:50%; left:50%; background:currentColor;
+    transform:translate(-50%,-50%);
+  }
+  .acc-icon::before{width:12px; height:2px;}
+  .acc-icon::after{width:2px; height:12px; transition:opacity .2s ease;}
+  .acc-item.open .acc-icon::after{opacity:0;}
+
+  .acc-panel{
+    max-height:0; overflow:hidden;
+    transition:max-height .28s cubic-bezier(.4,0,.2,1);
+  }
+  .acc-panel-inner{padding:0 20px 20px; color:var(--muted); font-size:14px; line-height:1.65;}
+
+  .meta{margin-top:22px; font-size:12.5px; color:#4b5764;}
+
+  @media (prefers-reduced-motion: reduce){
+    .acc-panel, .acc-icon{transition:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back mono" href="bt36.html">← bt36.html</a>
+  <div><span class="code mono">TK5</span></div>
+  <h1 class="display">Accordion đơn giản</h1>
+  <p class="sub">Click vào tiêu đề để mở/đóng nội dung. Chỉ một mục được mở tại một thời điểm, chiều cao thay đổi mượt bằng CSS transition trên <code class="mono">max-height</code>.</p>
+
+  <div class="accordion" id="accordion">
+    <div class="acc-item open">
+      <button class="acc-header">
+        <span>1. Accordion là gì?</span>
+        <span class="acc-icon"></span>
+      </button>
+      <div class="acc-panel">
+        <div class="acc-panel-inner">Accordion là thành phần giao diện cho phép ẩn/hiện từng khối nội dung, giúp trang gọn gàng hơn khi có nhiều thông tin cần trình bày theo nhóm — thường dùng cho FAQ, menu, hoặc bảng nội dung dài.</div>
+      </div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-header">
+        <span>2. Nguyên lý hoạt động</span>
+        <span class="acc-icon"></span>
+      </button>
+      <div class="acc-panel">
+        <div class="acc-panel-inner">Mỗi mục gồm phần tiêu đề (header) và phần nội dung (panel). Khi click header, JS toggle class <code>open</code> trên mục đó, đồng thời đóng các mục khác. CSS dựa vào class đó để chuyển <code>max-height</code> từ 0 sang chiều cao thật của nội dung.</div>
+      </div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-header">
+        <span>3. Vì sao dùng max-height thay vì height</span>
+        <span class="acc-icon"></span>
+      </button>
+      <div class="acc-panel">
+        <div class="acc-panel-inner"><code>height: auto</code> không thể transition mượt vì trình duyệt không nội suy được giá trị "auto". Dùng <code>max-height</code> với một giá trị đủ lớn (hoặc tính bằng scrollHeight) giúp animation chạy mượt mà.</div>
+      </div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-header">
+        <span>4. Ứng dụng thực tế</span>
+        <span class="acc-icon"></span>
+      </button>
+      <div class="acc-panel">
+        <div class="acc-panel-inner">Accordion thường xuất hiện ở trang FAQ, sidebar danh mục sản phẩm, form nhiều bước, hoặc bảng điều khiển cài đặt có nhiều nhóm tùy chọn.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="meta mono">// mỗi lần click chỉ mở 1 mục, các mục khác tự đóng</div>
+</div>
+
+<script>
+  const accordion = document.getElementById('accordion');
+  const items = accordion.querySelectorAll('.acc-item');
+
+  function setPanelHeight(item, open){
+    const panel = item.querySelector('.acc-panel');
+    if(open){
+      panel.style.maxHeight = panel.scrollHeight + 'px';
+    } else {
+      panel.style.maxHeight = '0px';
+    }
+  }
+
+  items.forEach(item => {
+    const header = item.querySelector('.acc-header');
+    header.addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+
+      items.forEach(other => {
+        other.classList.remove('open');
+        setPanelHeight(other, false);
+      });
+
+      if(!isOpen){
+        item.classList.add('open');
+        setPanelHeight(item, true);
+      }
+    });
+  });
+
+  // Khởi tạo: mở mục đầu tiên
+  setPanelHeight(items[0], true);
+
+  // Cập nhật lại chiều cao khi resize (đề phòng nội dung xuống dòng khác)
+  window.addEventListener('resize', () => {
+    items.forEach(item => {
+      if(item.classList.contains('open')) setPanelHeight(item, true);
+    });
+  });
+</script>
+</body>
+</html>

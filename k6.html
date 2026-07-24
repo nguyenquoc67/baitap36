@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K6 — Xử lý sự kiện bàn phím</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#10161d; --panel-2:#141b23; --line:#212b35;
+    --text:#e6edf3; --muted:#7c8a99; --accent:#5eead4; --accent-dim:rgba(94,234,212,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:radial-gradient(ellipse 900px 500px at 15% -10%, rgba(94,234,212,0.06), transparent 60%), var(--bg);
+    color:var(--text); font-family:'IBM Plex Sans', sans-serif; min-height:100vh;
+    padding:48px 24px 80px; line-height:1.6;
+  }
+  .wrap{max-width:680px; margin:0 auto;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+  .display{font-family:'Space Grotesk', sans-serif;}
+  .back{display:inline-flex; align-items:center; gap:6px; color:var(--muted); text-decoration:none; font-size:13px; margin-bottom:28px;}
+  .back:hover{color:var(--accent);}
+  .code{font-size:12px; color:var(--accent); background:var(--accent-dim); padding:3px 8px; border-radius:3px;}
+  h1{font-size:clamp(26px,4vw,34px); font-weight:700; margin:14px 0 6px;}
+  .sub{color:var(--muted); font-size:14px; margin-bottom:28px;}
+
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:26px;}
+
+  .zone{
+    background:var(--panel-2); border:1px dashed var(--line); border-radius:8px;
+    padding:24px; text-align:center; margin-bottom:20px; cursor:text;
+    transition:border-color .15s ease;
+  }
+  .zone:focus{outline:none; border-color:var(--accent);}
+  .zone-hint{color:var(--muted); font-size:12.5px;}
+
+  .key-display{
+    font-family:'JetBrains Mono', monospace; font-size:34px; font-weight:600;
+    color:var(--accent); margin:6px 0 4px; min-height:44px;
+  }
+
+  .stats{display:flex; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:6px; overflow:hidden; margin-bottom:20px;}
+  .stat{flex:1; background:var(--panel-2); padding:12px 14px; text-align:center;}
+  .stat .num{font-family:'Space Grotesk', sans-serif; font-size:20px; font-weight:700;}
+  .stat .lbl{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-top:2px;}
+
+  .demo-title{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px;}
+
+  .arrows{display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom:20px;}
+  .arrow-key{
+    width:44px; height:44px; border-radius:6px; border:1px solid var(--line); background:var(--panel-2);
+    display:flex; align-items:center; justify-content:center; font-size:16px; color:var(--muted);
+    transition:background .1s ease, color .1s ease, border-color .1s ease;
+  }
+  .arrow-key.active{background:var(--accent-dim); border-color:var(--accent); color:var(--accent);}
+
+  .log{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--muted);
+    max-height:120px; overflow-y:auto; background:var(--panel-2); border-radius:6px; padding:10px 12px;
+  }
+  .log div{padding:2px 0;}
+  .log span{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back mono" href="bt36.html">← bt36.html</a>
+  <div><span class="code mono">K6</span></div>
+  <h1 class="display">Xử lý sự kiện bàn phím</h1>
+  <p class="sub">Bấm bất kỳ phím nào để xem thông tin sự kiện <code class="mono">keydown</code> — mã phím, phím mũi tên, và số lần gõ.</p>
+
+  <div class="panel">
+    <div class="zone" id="zone" tabindex="0">
+      <div class="key-display mono" id="keyDisplay">—</div>
+      <div class="zone-hint mono" id="zoneHint">Click vào đây rồi gõ một phím bất kỳ</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="num mono" id="keyCount">0</div><div class="lbl">lần gõ</div></div>
+      <div class="stat"><div class="num mono" id="lastCode">—</div><div class="lbl">key code</div></div>
+      <div class="stat"><div class="num mono" id="lastKey">—</div><div class="lbl">event.key</div></div>
+    </div>
+
+    <div class="demo-title mono">// phím mũi tên (arrow keys)</div>
+    <div class="arrows">
+      <div class="arrow-key" id="arrowLeft">←</div>
+      <div class="arrow-key" id="arrowUp">↑</div>
+      <div class="arrow-key" id="arrowDown">↓</div>
+      <div class="arrow-key" id="arrowRight">→</div>
+    </div>
+
+    <div class="demo-title mono">// nhật ký sự kiện gần nhất</div>
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<script>
+  const zone = document.getElementById('zone');
+  const keyDisplay = document.getElementById('keyDisplay');
+  const zoneHint = document.getElementById('zoneHint');
+  const keyCountEl = document.getElementById('keyCount');
+  const lastCodeEl = document.getElementById('lastCode');
+  const lastKeyEl = document.getElementById('lastKey');
+  const logEl = document.getElementById('log');
+
+  const arrowMap = {
+    ArrowLeft: document.getElementById('arrowLeft'),
+    ArrowUp: document.getElementById('arrowUp'),
+    ArrowDown: document.getElementById('arrowDown'),
+    ArrowRight: document.getElementById('arrowRight')
+  };
+
+  let count = 0;
+
+  function addLog(text){
+    const line = document.createElement('div');
+    line.innerHTML = text;
+    logEl.prepend(line);
+    while(logEl.children.length > 8) logEl.removeChild(logEl.lastChild);
+  }
+
+  function handleKey(e){
+    count++;
+    keyCountEl.textContent = count;
+    lastCodeEl.textContent = e.keyCode;
+    lastKeyEl.textContent = e.key === ' ' ? 'Space' : e.key;
+
+    keyDisplay.textContent = e.key === ' ' ? 'Space' : e.key;
+    zoneHint.textContent = `code: ${e.code}`;
+
+    if(arrowMap[e.key]){
+      e.preventDefault();
+      Object.values(arrowMap).forEach(el => el.classList.remove('active'));
+      arrowMap[e.key].classList.add('active');
+      setTimeout(() => arrowMap[e.key].classList.remove('active'), 180);
+    }
+
+    addLog(`<span>${e.key === ' ' ? 'Space' : e.key}</span> — code: ${e.code}, keyCode: ${e.keyCode}`);
+  }
+
+  zone.addEventListener('keydown', handleKey);
+
+  zone.addEventListener('focus', () => {
+    zone.style.borderColor = 'var(--accent)';
+  });
+  zone.addEventListener('blur', () => {
+    zone.style.borderColor = 'var(--line)';
+  });
+</script>
+</body>
+</html>
