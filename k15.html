@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K15 — Grid Layout động</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#10161d; --panel-2:#141b23; --line:#212b35;
+    --text:#e6edf3; --muted:#7c8a99; --accent:#5eead4; --accent-dim:rgba(94,234,212,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:radial-gradient(ellipse 900px 500px at 15% -10%, rgba(94,234,212,0.06), transparent 60%), var(--bg);
+    color:var(--text); font-family:'IBM Plex Sans', sans-serif; min-height:100vh;
+    padding:48px 24px 80px; line-height:1.6;
+  }
+  .wrap{max-width:860px; margin:0 auto;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+  .display{font-family:'Space Grotesk', sans-serif;}
+  .back{display:inline-flex; align-items:center; gap:6px; color:var(--muted); text-decoration:none; font-size:13px; margin-bottom:28px;}
+  .back:hover{color:var(--accent);}
+  .code{font-size:12px; color:var(--accent); background:var(--accent-dim); padding:3px 8px; border-radius:3px;}
+  h1{font-size:clamp(26px,4vw,34px); font-weight:700; margin:14px 0 6px;}
+  .sub{color:var(--muted); font-size:14px; margin-bottom:32px; max-width:60ch;}
+
+  .controls{
+    display:flex; flex-wrap:wrap; gap:20px; align-items:flex-end;
+    background:var(--panel); border:1px solid var(--line); border-radius:6px;
+    padding:20px 22px; margin-bottom:24px;
+  }
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em;}
+  .field input[type=range]{accent-color:var(--accent); width:160px;}
+  .field .val{font-family:'JetBrains Mono', monospace; color:var(--accent); font-size:13px;}
+  .btn{
+    background:var(--accent-dim); color:var(--accent); border:1px solid var(--accent);
+    font-family:'JetBrains Mono', monospace; font-size:12px; padding:9px 16px; border-radius:4px;
+    cursor:pointer; transition:background .18s ease;
+  }
+  .btn:hover{background:rgba(94,234,212,0.22);}
+
+  #grid{
+    display:grid;
+    gap:10px;
+    margin-top:8px;
+  }
+  .cell{
+    aspect-ratio:1;
+    border-radius:4px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--bg);
+    font-weight:600;
+    opacity:0; transform:scale(0.85);
+    animation:pop .25s ease forwards;
+  }
+  @keyframes pop{to{opacity:1; transform:scale(1);}}
+
+  .meta{margin-top:20px; font-size:12.5px; color:#4b5764;}
+
+  @media (prefers-reduced-motion: reduce){
+    .cell{animation:none; opacity:1; transform:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back mono" href="bt36.html">← bt36.html</a>
+  <div><span class="code mono">K15</span></div>
+  <h1 class="display">Grid Layout động</h1>
+  <p class="sub">Số cột và số ô được sinh ra từ JavaScript, dùng <code class="mono">grid-template-columns</code> đặt trực tiếp qua style — kéo thanh trượt để thấy layout thay đổi theo thời gian thực.</p>
+
+  <div class="controls">
+    <div class="field">
+      <label>Số cột: <span class="val mono" id="colsVal">6</span></label>
+      <input type="range" id="cols" min="2" max="10" value="6">
+    </div>
+    <div class="field">
+      <label>Số ô: <span class="val mono" id="itemsVal">24</span></label>
+      <input type="range" id="items" min="4" max="60" value="24">
+    </div>
+    <button class="btn" id="regen">generate()</button>
+  </div>
+
+  <div id="grid"></div>
+  <div class="meta mono" id="meta"></div>
+</div>
+
+<script>
+  const grid = document.getElementById('grid');
+  const colsInput = document.getElementById('cols');
+  const itemsInput = document.getElementById('items');
+  const colsVal = document.getElementById('colsVal');
+  const itemsVal = document.getElementById('itemsVal');
+  const regenBtn = document.getElementById('regen');
+  const meta = document.getElementById('meta');
+
+  const palette = ['#5eead4', '#f5a623', '#7c93ff', '#ff6b81', '#a3e635', '#c084fc'];
+
+  function buildGrid(){
+    const cols = Number(colsInput.value);
+    const items = Number(itemsInput.value);
+    colsVal.textContent = cols;
+    itemsVal.textContent = items;
+
+    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    grid.innerHTML = '';
+
+    for(let i = 0; i < items; i++){
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.textContent = i + 1;
+      cell.style.background = palette[i % palette.length];
+      cell.style.animationDelay = (i * 12) + 'ms';
+      grid.appendChild(cell);
+    }
+
+    meta.textContent = `grid-template-columns: repeat(${cols}, 1fr) · ${items} phần tử · ${Math.ceil(items/cols)} hàng`;
+  }
+
+  colsInput.addEventListener('input', buildGrid);
+  itemsInput.addEventListener('input', buildGrid);
+  regenBtn.addEventListener('click', buildGrid);
+
+  buildGrid();
+</script>
+</body>
+</html>

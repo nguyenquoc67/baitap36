@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TK8 — Hex sang RGB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#10161d; --panel-2:#141b23; --line:#212b35;
+    --text:#e6edf3; --muted:#7c8a99; --accent:#5eead4; --accent-dim:rgba(94,234,212,0.12);
+    --bad:#ff6b81;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:radial-gradient(ellipse 900px 500px at 15% -10%, rgba(94,234,212,0.06), transparent 60%), var(--bg);
+    color:var(--text); font-family:'IBM Plex Sans', sans-serif; min-height:100vh;
+    padding:48px 24px 80px; line-height:1.6;
+  }
+  .wrap{max-width:640px; margin:0 auto;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+  .display{font-family:'Space Grotesk', sans-serif;}
+  .back{display:inline-flex; align-items:center; gap:6px; color:var(--muted); text-decoration:none; font-size:13px; margin-bottom:28px;}
+  .back:hover{color:var(--accent);}
+  .code{font-size:12px; color:var(--accent); background:var(--accent-dim); padding:3px 8px; border-radius:3px;}
+  h1{font-size:clamp(26px,4vw,34px); font-weight:700; margin:14px 0 6px;}
+  .sub{color:var(--muted); font-size:14px; margin-bottom:32px;}
+
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:28px; display:flex; gap:24px; flex-wrap:wrap; align-items:center;}
+
+  .swatch{
+    width:120px; height:120px; border-radius:8px; flex:none;
+    border:1px solid var(--line);
+    transition:background .15s ease;
+  }
+
+  .form{flex:1; min-width:220px;}
+  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:16px;}
+  .field label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em;}
+  .hex-input{
+    display:flex; align-items:center; gap:0;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:4px; overflow:hidden;
+  }
+  .hex-input span{padding:10px 4px 10px 12px; color:var(--muted); font-family:'JetBrains Mono', monospace;}
+  .hex-input input{
+    flex:1; background:none; border:none; outline:none; color:var(--text);
+    font-family:'JetBrains Mono', monospace; font-size:16px; padding:10px 12px 10px 2px; letter-spacing:1px;
+  }
+  .hex-input.invalid{border-color:var(--bad);}
+  .error{font-size:12px; color:var(--bad); min-height:16px; margin-top:6px;}
+
+  .result{font-family:'JetBrains Mono', monospace; font-size:18px; color:var(--accent);}
+  .result .label{color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:4px;}
+
+  .presets{display:flex; gap:8px; margin-top:20px; flex-wrap:wrap;}
+  .preset{
+    width:28px; height:28px; border-radius:6px; border:1px solid var(--line); cursor:pointer;
+    transition:transform .12s ease;
+  }
+  .preset:hover{transform:scale(1.1);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back mono" href="bt36.html">← bt36.html</a>
+  <div><span class="code mono">TK8</span></div>
+  <h1 class="display">Chuyển đổi Hex sang RGB</h1>
+  <p class="sub">Nhập mã màu Hex (dạng #RRGGBB hoặc #RGB), giá trị RGB tương ứng sẽ tự động hiển thị.</p>
+
+  <div class="panel">
+    <div class="swatch" id="swatch"></div>
+    <div class="form">
+      <div class="field">
+        <label>Mã Hex</label>
+        <div class="hex-input" id="hexWrap">
+          <span>#</span>
+          <input type="text" id="hexInput" maxlength="7" value="5eead4" spellcheck="false">
+        </div>
+        <div class="error mono" id="errorMsg"></div>
+      </div>
+      <div class="result mono">
+        <span class="label">RGB</span>
+        <span id="rgbOut">rgb(94, 234, 212)</span>
+      </div>
+      <div class="presets" id="presets"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const hexInput = document.getElementById('hexInput');
+  const hexWrap = document.getElementById('hexWrap');
+  const errorMsg = document.getElementById('errorMsg');
+  const rgbOut = document.getElementById('rgbOut');
+  const swatch = document.getElementById('swatch');
+  const presetsWrap = document.getElementById('presets');
+
+  const presetColors = ['5eead4','f5a623','ff6b81','a3e635','7c93ff','c084fc','ffffff','0b0f14'];
+
+  function hexToRgb(hex){
+    hex = hex.replace('#', '').trim();
+    if(hex.length === 3){
+      hex = hex.split('').map(c => c + c).join('');
+    }
+    if(!/^[0-9a-fA-F]{6}$/.test(hex)) return null;
+
+    const r = parseInt(hex.substring(0,2), 16);
+    const g = parseInt(hex.substring(2,4), 16);
+    const b = parseInt(hex.substring(4,6), 16);
+    return { r, g, b };
+  }
+
+  function update(){
+    const raw = hexInput.value;
+    const rgb = hexToRgb(raw);
+
+    if(!rgb){
+      hexWrap.classList.add('invalid');
+      errorMsg.textContent = 'Mã hex không hợp lệ — cần 3 hoặc 6 ký tự hex (0-9, A-F)';
+      return;
+    }
+
+    hexWrap.classList.remove('invalid');
+    errorMsg.textContent = '';
+    rgbOut.textContent = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+    swatch.style.background = `#${raw.replace('#','')}`;
+  }
+
+  hexInput.addEventListener('input', update);
+
+  presetColors.forEach(hex => {
+    const btn = document.createElement('button');
+    btn.className = 'preset';
+    btn.style.background = '#' + hex;
+    btn.title = '#' + hex;
+    btn.addEventListener('click', () => {
+      hexInput.value = hex;
+      update();
+    });
+    presetsWrap.appendChild(btn);
+  });
+
+  update();
+</script>
+</body>
+</html>

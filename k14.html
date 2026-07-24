@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K14 — Hiệu ứng cuộn mượt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#10161d; --panel-2:#141b23; --line:#212b35;
+    --text:#e6edf3; --muted:#7c8a99; --accent:#5eead4; --accent-dim:rgba(94,234,212,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg); color:var(--text); font-family:'IBM Plex Sans', sans-serif; line-height:1.6;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+  .display{font-family:'Space Grotesk', sans-serif;}
+
+  nav{
+    position:sticky; top:0; z-index:10;
+    display:flex; gap:4px; overflow-x:auto;
+    background:rgba(11,15,20,0.92); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+    padding:14px 24px;
+  }
+  nav a{
+    flex:none; color:var(--muted); text-decoration:none; font-size:13px;
+    padding:8px 14px; border-radius:20px; border:1px solid transparent;
+    transition:color .18s ease, border-color .18s ease, background .18s ease;
+    white-space:nowrap;
+  }
+  nav a:hover{color:var(--accent); border-color:var(--line); background:var(--panel-2);}
+  nav a.active{color:var(--accent); border-color:var(--accent); background:var(--accent-dim);}
+  nav .back{margin-right:auto; color:var(--text); font-family:'JetBrains Mono', monospace;}
+
+  header.hero{padding:64px 24px 20px; max-width:720px; margin:0 auto;}
+  .code{font-size:12px; color:var(--accent); background:var(--accent-dim); padding:3px 8px; border-radius:3px;}
+  h1{font-size:clamp(26px,4vw,34px); font-weight:700; margin:14px 0 6px;}
+  .sub{color:var(--muted); font-size:14px;}
+
+  section{
+    max-width:720px; margin:0 auto;
+    min-height:70vh;
+    padding:60px 24px;
+    display:flex; flex-direction:column; justify-content:center;
+    border-top:1px solid var(--line);
+  }
+  section .idx{font-size:12px; color:var(--accent); margin-bottom:10px;}
+  section h2{font-family:'Space Grotesk', sans-serif; font-size:26px; margin-bottom:12px;}
+  section p{color:var(--muted); max-width:52ch;}
+
+  footer{max-width:720px; margin:0 auto; padding:40px 24px 80px; color:#4b5764; font-size:12px;}
+</style>
+</head>
+<body>
+
+<nav class="mono">
+  <a class="back" href="bt36.html">← bt36.html</a>
+  <a href="#s1">01 Giới thiệu</a>
+  <a href="#s2">02 Cách hoạt động</a>
+  <a href="#s3">03 Ứng dụng</a>
+  <a href="#s4">04 Kết luận</a>
+</nav>
+
+<header class="hero">
+  <span class="code mono">K14</span>
+  <h1 class="display">Hiệu ứng cuộn mượt</h1>
+  <p class="sub">Bấm vào menu phía trên — trang sẽ cuộn mượt đến từng section nhờ <code class="mono">scrollIntoView({behavior:'smooth'})</code> kết hợp CSS <code class="mono">scroll-behavior: smooth</code>.</p>
+</header>
+
+<section id="s1">
+  <div class="idx mono">// 01</div>
+  <h2>Giới thiệu</h2>
+  <p>Thay vì trang nhảy giật cục khi click vào link neo (#anchor), trình duyệt sẽ cuộn dần đến đích với hiệu ứng easing tự nhiên.</p>
+</section>
+
+<section id="s2">
+  <div class="idx mono">// 02</div>
+  <h2>Cách hoạt động</h2>
+  <p>Mỗi liên kết trong menu trỏ tới một <code class="mono">id</code> tương ứng. JavaScript lắng nghe sự kiện click, gọi <code class="mono">preventDefault()</code> rồi dùng <code class="mono">element.scrollIntoView()</code> để cuộn mượt, đồng thời cập nhật trạng thái active trên menu.</p>
+</section>
+
+<section id="s3">
+  <div class="idx mono">// 03</div>
+  <h2>Ứng dụng thực tế</h2>
+  <p>Thường dùng cho landing page một trang, tài liệu kỹ thuật có mục lục, hoặc portfolio nhiều section như bt36.html của bài này.</p>
+</section>
+
+<section id="s4">
+  <div class="idx mono">// 04</div>
+  <h2>Kết luận</h2>
+  <p>Smooth scroll là chi tiết nhỏ nhưng cải thiện đáng kể trải nghiệm điều hướng, đặc biệt trên trang một cột (single-page).</p>
+</section>
+
+<footer class="mono">K14 · Smooth Scroll — bt36.html</footer>
+
+<script>
+  const links = document.querySelectorAll('nav a[href^="#"]');
+  const sections = [...links].map(a => document.querySelector(a.getAttribute('href')));
+
+  links.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Cập nhật link active khi cuộn tới section tương ứng
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const link = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+      if(!link) return;
+      if(entry.isIntersecting){
+        links.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      }
+    });
+  }, { threshold: 0.5 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
